@@ -8,6 +8,9 @@ import { Header } from '@/components/layout/Header';
 import { useChatStore } from '@/stores/chatStore';
 import { useTheme } from '@/hooks/useTheme';
 
+// 🔥 IMPORTANT: Edge Runtime add karein
+export const runtime = 'edge';
+
 export default function ChatIdPage() {
   const params = useParams();
   const chatId = params.chatId as string;
