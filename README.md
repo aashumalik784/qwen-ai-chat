@@ -1,13 +1,14 @@
-# 🤖 Qwen AI Chat
+# 🤖 Gemini AI Chat
 
-A modern, ChatGPT-style AI chatbot powered by Qwen (Alibaba Cloud), built with Next.js 14 and deployed on Cloudflare Pages.
+A modern, ChatGPT-style AI chatbot powered by **Google Gemini API**, built with Next.js 14 and deployed on Cloudflare Pages.
 
 ## ✨ Features
 
-- 🚀 **Streaming Responses** - Real-time token-by-token generation
-- 💬 **Chat History** - Save and manage multiple conversations
-- 🌓 **Dark/Light Mode** - Beautiful theme switching
+- 🚀 **100% FREE** - Uses Google Gemini API (no credit card required)
+- 💬 **Streaming Responses** - Real-time token-by-token generation
 - 📝 **Markdown Support** - Rich text with code highlighting
+- 🌓 **Dark/Light Mode** - Beautiful theme switching
+- 💾 **Chat History** - Save and manage multiple conversations
 - 📱 **Responsive Design** - Works on mobile, tablet, and desktop
 - ⚡ **Edge Deployed** - Lightning fast on Cloudflare's global network
 
@@ -16,7 +17,7 @@ A modern, ChatGPT-style AI chatbot powered by Qwen (Alibaba Cloud), built with N
 - **Frontend:** Next.js 14 (App Router), React 18, TypeScript
 - **Styling:** Tailwind CSS
 - **State:** Zustand
-- **AI:** Qwen API (DashScope)
+- **AI:** Google Gemini API
 - **Hosting:** Cloudflare Pages
 
 ## 🚀 Getting Started
@@ -26,28 +27,39 @@ A modern, ChatGPT-style AI chatbot powered by Qwen (Alibaba Cloud), built with N
 npm install
 ```
 
-### 2. Set up environment variables
+### 2. Get Gemini API Key
+1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Click "Create API Key"
+3. Copy your API key
+
+### 3. Set up environment variables
 ```bash
 cp .env.example .env.local
 ```
-Edit `.env.local` and add your Qwen API key.
 
-### 3. Run development server
+Edit `.env.local` and add your Gemini API key:
+```bash
+GEMINI_API_KEY=AIzaSy...your_gemini_api_key_here
+```
+
+### 4. Run development server
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000)
 
-### 4. Deploy to Cloudflare Pages
+### 5. Deploy to Cloudflare Pages
 ```bash
 npm run pages:deploy
 ```
 
-## 🔑 Get Qwen API Key
+## 🔑 Gemini API Limits
 
-1. Visit [Alibaba Cloud DashScope](https://dashscope.console.aliyun.com/)
-2. Sign up and create an API key
-3. Add it to your `.env.local` file
+- ✅ **1500 requests/day** (FREE)
+- ✅ **60 requests/minute**
+- ✅ **No credit card required**
+- ✅ **Lifetime free**
 
 ## 📄 License
 
