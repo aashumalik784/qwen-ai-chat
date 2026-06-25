@@ -1,11 +1,10 @@
-name = "qwen-ai-chat"
+name = "gemini-ai-chat"
 compatibility_date = "2024-09-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
 [vars]
-NEXT_PUBLIC_APP_NAME = "Qwen AI Chat"
+NEXT_PUBLIC_APP_NAME = "Gemini AI Chat"
 
 # Secrets ko Cloudflare Dashboard se set karein:
-# QWEN_API_KEY
-# QWEN_API_ENDPOINT
+# GEMINI_API_KEY - Apni Gemini API key yahan add karein
