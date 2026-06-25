@@ -25,10 +25,10 @@ export function MessageList({ messages }: MessageListProps) {
             <Bot className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Welcome to Qwen AI Chat
+            Welcome to Aashu AI Chat
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            I'm Qwen, your AI assistant. Ask me anything - coding, writing, analysis, or just chat!
+            I'm Aashu AI, your AI assistant. Ask me anything - coding, writing, analysis, or just chat!
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
             {[
