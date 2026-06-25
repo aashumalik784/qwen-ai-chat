@@ -1,5 +1,5 @@
 export const APP_NAME = 'Aashu AI Chat';
-export const DEFAULT_MODEL = 'gemini-pro';
+export const DEFAULT_MODEL = 'llama-3.3-70b';
 export const MAX_TOKENS = 4096;
 export const TEMPERATURE = 0.7;
 
@@ -20,18 +20,11 @@ export const STORAGE_KEYS = {
   ACTIVE_CHAT: 'aashu_active_chat',
 };
 
-// Gemini-specific configurations
-export const GEMINI_CONFIG = {
+export const CEREBRAS_CONFIG = {
   models: {
-    'gemini-pro': 'Gemini Pro (Recommended)',
-    'gemini-1.5-flash': 'Gemini 1.5 Flash (Fastest)',
-    'gemini-1.5-pro': 'Gemini 1.5 Pro (Most Capable)',
+    'llama-3.3-70b': 'Llama 3.3 70B (Most Capable)',
+    'llama3.1-8b': 'Llama 3.1 8B (Fastest)',
+    'qwen-2.5-72b': 'Qwen 2.5 72B',
   },
-  defaultModel: 'gemini-pro',
-  maxOutputTokens: 8192,
-  temperatureRange: {
-    min: 0.0,
-    max: 1.0,
-    default: 0.7,
-  },
+  defaultModel: 'llama-3.3-70b',
 };
