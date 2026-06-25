@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   ACTIVE_CHAT: 'aashu_active_chat',
 };
 
+// Cerebras-specific configurations
 export const CEREBRAS_CONFIG = {
   models: {
     'llama-3.3-70b': 'Llama 3.3 70B (Most Capable)',
@@ -27,4 +28,10 @@ export const CEREBRAS_CONFIG = {
     'qwen-2.5-72b': 'Qwen 2.5 72B',
   },
   defaultModel: 'llama-3.3-70b',
+  maxOutputTokens: 8192,
+  temperatureRange: {
+    min: 0.0,
+    max: 1.0,
+    default: 0.7,
+  },
 };
