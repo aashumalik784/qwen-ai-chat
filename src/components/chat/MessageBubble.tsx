@@ -25,7 +25,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         <div className={cn(
           'text-xs font-medium mb-1 text-gray-500 dark:text-gray-400',
         )}>
-          {isUser ? 'You' : 'Qwen'}
+          {isUser ? 'You' : 'Aashu AI'}
         </div>
         <div className={cn(
           'rounded-2xl px-4 py-3',
