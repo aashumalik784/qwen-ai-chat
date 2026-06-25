@@ -24,7 +24,7 @@ export function Avatar({ type, className }: AvatarProps) {
       'w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0',
       className
     )}>
-      Q
+      A
     </div>
   );
 }
