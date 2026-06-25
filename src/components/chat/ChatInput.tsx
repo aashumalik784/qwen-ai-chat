@@ -52,7 +52,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message Qwen..."
+            placeholder="Message Aashu AI..."
             disabled={disabled}
             rows={1}
             className="flex-1 resize-none bg-transparent px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none max-h-[200px]"
@@ -79,7 +79,7 @@ export function ChatInput({ onSend, onStop, isGenerating, disabled }: ChatInputP
           )}
         </div>
         <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
-          Qwen can make mistakes. Consider checking important information.
+          Aashu AI can make mistakes. Consider checking important information.
         </p>
       </div>
     </div>
