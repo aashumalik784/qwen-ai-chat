@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { messages, model = 'llama-3.3-70b', stream = false, temperature = 0.7, max_tokens = 4096 } = body;
 
+    // Validate messages
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
         { error: 'Messages array is required' },
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get Cerebras API key
     const apiKey = process.env.CEREBRAS_API_KEY;
 
     if (!apiKey) {
@@ -23,6 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Call Cerebras API
     const response = await fetch('https://api.cerebras.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -44,14 +47,14 @@ export async function POST(request: NextRequest) {
       
       if (response.status === 401) {
         return NextResponse.json(
-          { error: 'Invalid Cerebras API key' },
+          { error: 'Invalid Cerebras API key. Please check your CEREBRAS_API_KEY.' },
           { status: 401 }
         );
       }
       
       if (response.status === 429) {
         return NextResponse.json(
-          { error: 'Rate limit exceeded. Please wait a moment.' },
+          { error: 'Rate limit exceeded. Please wait a moment and try again.' },
           { status: 429 }
         );
       }
@@ -64,6 +67,7 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
 
+    // Return response
     return NextResponse.json({
       id: data.id,
       object: 'chat.completion',
