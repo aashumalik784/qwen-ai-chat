@@ -21,7 +21,7 @@ export function Header() {
           <Menu className="w-5 h-5" />
         </Button>
         <h1 className="font-semibold text-gray-900 dark:text-gray-100">
-          Qwen AI Chat
+          Aashu AI Chat
         </h1>
       </div>
       <div className="flex items-center gap-2">
