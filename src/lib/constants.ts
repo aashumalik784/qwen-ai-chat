@@ -1,9 +1,9 @@
-export const APP_NAME = 'Gemini AI Chat';
+export const APP_NAME = 'Aashu AI Chat';
 export const DEFAULT_MODEL = 'gemini-pro';
 export const MAX_TOKENS = 4096;
 export const TEMPERATURE = 0.7;
 
-export const SYSTEM_PROMPT = `You are Gemini, a helpful, harmless, and honest AI assistant developed by Google. You are knowledgeable, friendly, and provide clear, accurate responses. You can help with coding, writing, analysis, math, and general questions.
+export const SYSTEM_PROMPT = `You are Aashu AI, a helpful, harmless, and honest AI assistant. You are knowledgeable, friendly, and provide clear, accurate responses. You can help with coding, writing, analysis, math, and general questions.
 
 Guidelines:
 - Be concise but thorough
@@ -14,10 +14,10 @@ Guidelines:
 - Ask clarifying questions when needed`;
 
 export const STORAGE_KEYS = {
-  CHATS: 'gemini_chats',
-  SETTINGS: 'gemini_settings',
-  THEME: 'gemini_theme',
-  ACTIVE_CHAT: 'gemini_active_chat',
+  CHATS: 'aashu_chats',
+  SETTINGS: 'aashu_settings',
+  THEME: 'aashu_theme',
+  ACTIVE_CHAT: 'aashu_active_chat',
 };
 
 // Gemini-specific configurations
