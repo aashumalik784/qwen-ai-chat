@@ -1,5 +1,5 @@
 export const APP_NAME = 'Aashu AI Chat';
-export const DEFAULT_MODEL = 'llama-3.3-70b';
+export const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
 export const MAX_TOKENS = 4096;
 export const TEMPERATURE = 0.7;
 
@@ -20,14 +20,15 @@ export const STORAGE_KEYS = {
   ACTIVE_CHAT: 'aashu_active_chat',
 };
 
-// Cerebras-specific configurations
-export const CEREBRAS_CONFIG = {
+// Groq-specific configurations
+export const GROQ_CONFIG = {
   models: {
-    'llama-3.3-70b': 'Llama 3.3 70B (Most Capable)',
-    'llama3.1-8b': 'Llama 3.1 8B (Fastest)',
-    'qwen-2.5-72b': 'Qwen 2.5 72B',
+    'llama-3.3-70b-versatile': 'Llama 3.3 70B (Most Capable)',
+    'llama-3.1-8b-instant': 'Llama 3.1 8B (Fastest)',
+    'mixtral-8x7b-32768': 'Mixtral 8x7B',
+    'gemma2-9b-it': 'Gemma 2 9B',
   },
-  defaultModel: 'llama-3.3-70b',
+  defaultModel: 'llama-3.3-70b-versatile',
   maxOutputTokens: 8192,
   temperatureRange: {
     min: 0.0,
