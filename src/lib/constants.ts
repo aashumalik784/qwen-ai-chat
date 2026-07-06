@@ -28,9 +28,8 @@ export const STORAGE_KEYS = {
   THEME: 'aashu_theme',
   ACTIVE_CHAT: 'aashu_active_chat',
   SELECTED_PROVIDER: 'aashu_provider',
-};
+} as const;
 
-// All AI Providers Configuration
 export const AI_PROVIDERS = {
   groq: {
     name: 'Groq',
