@@ -1,40 +1,36 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DEFAULT_MODEL, TEMPERATURE, MAX_TOKENS } from '@/lib/constants';
+import { AIProvider } from '@/lib/constants';
 
-interface Settings {
+interface SettingsState {
   model: string;
-  temperature: number;
-  maxTokens: number;
-  theme: 'light' | 'dark' | 'system';
-  sidebarOpen: boolean;
-}
-
-interface SettingsStore extends Settings {
   setModel: (model: string) => void;
-  setTemperature: (temp: number) => void;
-  setMaxTokens: (tokens: number) => void;
-  setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  temperature: number;
+  setTemperature: (temperature: number) => void;
+  maxTokens: number;
+  setMaxTokens: (maxTokens: number) => void;
+  selectedProvider: AIProvider;
+  setSelectedProvider: (provider: AIProvider) => void;
+  sidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
-export const useSettingsStore = create<SettingsStore>()(
+export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      model: DEFAULT_MODEL,
-      temperature: TEMPERATURE,
-      maxTokens: MAX_TOKENS,
-      theme: 'system',
-      sidebarOpen: true,
-
+      model: 'llama-3.3-70b-versatile',
       setModel: (model) => set({ model }),
+      temperature: 0.7,
       setTemperature: (temperature) => set({ temperature }),
+      maxTokens: 4096,
       setMaxTokens: (maxTokens) => set({ maxTokens }),
-      setTheme: (theme) => set({ theme }),
+      selectedProvider: 'groq',
+      setSelectedProvider: (selectedProvider) => set({ selectedProvider }),
+      sidebarOpen: true,
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
     }),
     {
-      name: 'qwen-settings-storage',
+      name: 'aashu_settings',
     }
   )
 );
