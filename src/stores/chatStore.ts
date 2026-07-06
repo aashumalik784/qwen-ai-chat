@@ -3,20 +3,21 @@ import { persist } from 'zustand/middleware';
 import { Chat, Message } from '@/types';
 import { generateId, generateChatTitle } from '@/lib/utils';
 import { SYSTEM_PROMPT } from '@/lib/constants';
+import { useSettingsStore } from './settingsStore'; // ✅ Add kiya
 
 interface ChatStore {
   chats: Chat[];
   activeChatId: string | null;
   isGenerating: boolean;
-  
+
   // Actions
   createChat: () => string;
   deleteChat: (id: string) => void;
   setActiveChat: (id: string | null) => void;
   addMessage: (chatId: string, message: Omit<Message, 'id' | 'timestamp'>) => void;
-  updateLastMessage: (chatId: string, content: string) => void;
+  updateLastMessage: (chatId: string, content: string, error?: boolean) => void; // ✅ error param add
   updateChatTitle: (chatId: string, title: string) => void;
-  toggleFavorite: (chatId: string) => void;  // ✅ NAYA ADD KIYA
+  toggleFavorite: (chatId: string) => void;
   setGenerating: (value: boolean) => void;
   getActiveChat: () => Chat | null;
   getMessagesForAPI: (chatId: string) => { role: 'user' | 'assistant' | 'system'; content: string }[];
@@ -31,16 +32,20 @@ export const useChatStore = create<ChatStore>()(
 
       createChat: () => {
         const id = generateId();
+        const { selectedProvider, selectedModel } = useSettingsStore.getState(); // ✅ Settings se liya
+
         const newChat: Chat = {
           id,
           title: 'New Chat',
           messages: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
-          favorite: false,  // ✅ Default false
+          favorite: false,
+          model: selectedModel, // ✅ Save kiya
+          provider: selectedProvider, // ✅ Save kiya
         };
         set((state) => ({
-          chats: [newChat, ...state.chats],
+          chats: [newChat,...state.chats],
           activeChatId: id,
         }));
         return id;
@@ -48,11 +53,11 @@ export const useChatStore = create<ChatStore>()(
 
       deleteChat: (id) => {
         set((state) => {
-          const newChats = state.chats.filter((c) => c.id !== id);
+          const newChats = state.chats.filter((c) => c.id!== id);
           return {
             chats: newChats,
-            activeChatId: state.activeChatId === id 
-              ? (newChats[0]?.id || null) 
+            activeChatId: state.activeChatId === id
+             ? (newChats[0]?.id || null)
               : state.activeChatId,
           };
         });
@@ -62,21 +67,21 @@ export const useChatStore = create<ChatStore>()(
 
       addMessage: (chatId, message) => {
         const newMessage: Message = {
-          ...message,
+         ...message,
           id: generateId(),
           timestamp: Date.now(),
         };
         set((state) => ({
           chats: state.chats.map((chat) => {
-            if (chat.id !== chatId) return chat;
-            
+            if (chat.id!== chatId) return chat;
+
             const updatedMessages = [...chat.messages, newMessage];
             const title = chat.messages.length === 0 && message.role === 'user'
-              ? generateChatTitle(message.content)
+             ? generateChatTitle(message.content)
               : chat.title;
-            
+
             return {
-              ...chat,
+             ...chat,
               messages: updatedMessages,
               title,
               updatedAt: Date.now(),
@@ -85,40 +90,40 @@ export const useChatStore = create<ChatStore>()(
         }));
       },
 
-      updateLastMessage: (chatId, content) => {
+      updateLastMessage: (chatId, content, error = false) => { // ✅ error param
         set((state) => ({
           chats: state.chats.map((chat) => {
-            if (chat.id !== chatId) return chat;
+            if (chat.id!== chatId) return chat;
             const messages = [...chat.messages];
             const lastMsg = messages[messages.length - 1];
             if (lastMsg && lastMsg.role === 'assistant') {
               messages[messages.length - 1] = {
-                ...lastMsg,
+               ...lastMsg,
                 content,
                 isStreaming: false,
+                error, // ✅ Error flag set
               };
             }
-            return { ...chat, messages, updatedAt: Date.now() };
+            return {...chat, messages, updatedAt: Date.now() };
           }),
         }));
       },
 
       updateChatTitle: (chatId, title) => {
         set((state) => ({
-          chats: state.chats.map((chat) => 
-            chat.id === chatId 
-              ? { ...chat, title, updatedAt: Date.now() }
+          chats: state.chats.map((chat) =>
+            chat.id === chatId
+             ? {...chat, title, updatedAt: Date.now() }
               : chat
           ),
         }));
       },
 
-      // ✅ NAYA FUNCTION ADD KIYA
       toggleFavorite: (chatId) => {
         set((state) => ({
-          chats: state.chats.map((chat) => 
-            chat.id === chatId 
-              ? { ...chat, favorite: !chat.favorite, updatedAt: Date.now() }
+          chats: state.chats.map((chat) =>
+            chat.id === chatId
+             ? {...chat, favorite:!chat.favorite, updatedAt: Date.now() }
               : chat
           ),
         }));
@@ -134,10 +139,10 @@ export const useChatStore = create<ChatStore>()(
       getMessagesForAPI: (chatId) => {
         const chat = get().chats.find((c) => c.id === chatId);
         if (!chat) return [];
-        
+
         return [
           { role: 'system' as const, content: SYSTEM_PROMPT },
-          ...chat.messages.map((m) => ({
+         ...chat.messages.map((m) => ({
             role: m.role as 'user' | 'assistant',
             content: m.content,
           })),
@@ -146,7 +151,7 @@ export const useChatStore = create<ChatStore>()(
     }),
     {
       name: 'qwen-chats-storage',
-      partialize: (state) => ({ 
+      partialize: (state) => ({
         chats: state.chats,
         activeChatId: state.activeChatId,
       }),
