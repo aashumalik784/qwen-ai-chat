@@ -1,6 +1,9 @@
 'use client';
 import { useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
+
+export type Theme = 'light' | 'dark';
+
 export function useTheme() {
   const { theme } = useSettingsStore();
   useEffect(() => {
