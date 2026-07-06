@@ -1,90 +1,168 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { AI_PROVIDERS } from '@/lib/constants';
 
 export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { messages, model = 'llama-3.3-70b-versatile', temperature = 0.7, max_tokens = 4096 } = body;
+    const { messages, provider = 'groq', model, temperature = 0.7, max_tokens = 4096 } = body;
 
-    console.log(' Received request:', { messages: messages.length, model });
+    console.log(`📩 Request for ${provider}:`, { messages: messages.length, model });
 
     // Validate messages
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      console.error('❌ No messages provided');
       return NextResponse.json(
         { error: 'Messages array is required' },
         { status: 400 }
       );
     }
 
-    // Get Groq API key
-    const apiKey = process.env.GROQ_API_KEY;
+    // Get provider config
+    const providerConfig = AI_PROVIDERS[provider as keyof typeof AI_PROVIDERS];
+    if (!providerConfig) {
+      return NextResponse.json(
+        { error: `Invalid provider: ${provider}` },
+        { status: 400 }
+      );
+    }
+
+    // Get API key
+    const apiKey = process.env[providerConfig.envVar];
 
     if (!apiKey) {
-      console.error('❌ GROQ_API_KEY not configured');
+      console.error(`❌ ${providerConfig.envVar} not configured`);
       return NextResponse.json(
-        { error: 'GROQ_API_KEY is not configured. Please add it in Cloudflare environment variables.' },
+        { error: `${providerConfig.name} API key is not configured` },
         { status: 500 }
       );
     }
 
-    console.log('🔑 API Key found, calling Groq API...');
+    const selectedModel = model || providerConfig.defaultModel;
+    console.log(`🔑 Using ${providerConfig.name} with model: ${selectedModel}`);
 
-    // Call Groq API (OpenAI-compatible format)
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: messages,
-        temperature: temperature,
-        max_tokens: max_tokens,
-        stream: false,
-      }),
-    });
+    let response;
 
-    console.log('📡 API Response status:', response.status);
+    // Call appropriate API based on provider
+    if (provider === 'gemini') {
+      // Gemini API has different format
+      const geminiMessages = messages.map((msg) => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }],
+      }));
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Groq API error:', response.status, errorText);
-      
-      if (response.status === 401) {
-        return NextResponse.json(
-          { error: 'Invalid Groq API key. Please check your GROQ_API_KEY in Cloudflare settings.' },
-          { status: 401 }
-        );
-      }
-      
-      if (response.status === 429) {
-        return NextResponse.json(
-          { error: 'Rate limit exceeded. Please wait a moment and try again.' },
-          { status: 429 }
-        );
-      }
-      
-      return NextResponse.json(
-        { error: `Groq API error: ${response.status} - ${errorText}` },
-        { status: response.status }
+      response = await fetch(
+        `${providerConfig.endpoint}/${selectedModel}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: geminiMessages,
+            generationConfig: {
+              temperature: temperature,
+              maxOutputTokens: max_tokens,
+            },
+          }),
+        }
       );
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error?.message || 'Gemini API error');
+      }
+
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
+
+      return NextResponse.json({
+        id: `gemini-${Date.now()}`,
+        choices: [{
+          message: { role: 'assistant', content },
+          finish_reason: 'stop',
+        }],
+        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+      });
+
+    } else if (provider === 'cohere') {
+      // Cohere API has different format
+      const lastMessage = messages[messages.length - 1];
+      
+      response = await fetch(`${providerConfig.endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          message: lastMessage.content,
+          model: selectedModel,
+          temperature: temperature,
+          max_tokens: max_tokens,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Cohere API error');
+      }
+
+      return NextResponse.json({
+        id: `cohere-${Date.now()}`,
+        choices: [{
+          message: { role: 'assistant', content: data.text },
+          finish_reason: 'stop',
+        }],
+        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+      });
+
+    } else {
+      // OpenAI-compatible APIs (Groq, Cerebras, OpenAI, DeepSeek, OpenRouter)
+      response = await fetch(providerConfig.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: messages,
+          temperature: temperature,
+          max_tokens: max_tokens,
+          stream: false,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ ${providerConfig.name} API error:`, response.status, errorText);
+        
+        if (response.status === 401) {
+          return NextResponse.json(
+            { error: `Invalid ${providerConfig.name} API key` },
+            { status: 401 }
+          );
+        }
+        
+        if (response.status === 429) {
+          return NextResponse.json(
+            { error: 'Rate limit exceeded. Please wait a moment.' },
+            { status: 429 }
+          );
+        }
+        
+        throw new Error(`${providerConfig.name} API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ ${providerConfig.name} success!`);
+
+      return NextResponse.json({
+        id: data.id,
+        choices: data.choices,
+        usage: data.usage,
+      });
     }
-
-    const data = await response.json();
-    console.log('✅ Success! Response received');
-
-    // Return response in OpenAI-compatible format
-    return NextResponse.json({
-      id: data.id,
-      object: 'chat.completion',
-      created: data.created,
-      model: data.model,
-      choices: data.choices,
-      usage: data.usage,
-    });
 
   } catch (error) {
     console.error('💥 API route error:', error);
@@ -93,4 +171,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+             }
