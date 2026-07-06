@@ -1,13 +1,34 @@
 'use client';
 
-import { MessageSquare, MoreVertical, Trash2 } from 'lucide-react';
+import { MessageSquare, MoreVertical, Trash2, Pencil, Star } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { cn, formatDate } from '@/lib/utils';
 import { Dropdown, DropdownItem } from '@/components/ui/Dropdown';
 import { ScrollArea } from '@/components/ui/ScrollArea';
+import { useState } from 'react';
 
 export function ChatHistoryList() {
   const { chats, activeChatId, setActiveChat, deleteChat } = useChat();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+
+  const handleRename = (chatId: string, currentTitle: string) => {
+    setEditingId(chatId);
+    setEditTitle(currentTitle);
+  };
+
+  const saveRename = (chatId: string) => {
+    if (editTitle.trim()) {
+      // You'll need to add updateChatTitle to useChat hook
+      // For now, this is a placeholder
+      setEditingId(null);
+    }
+  };
+
+  const handleFavorite = (chatId: string) => {
+    // Add favorite functionality
+    console.log('Toggle favorite for:', chatId);
+  };
 
   if (chats.length === 0) {
     return (
@@ -33,13 +54,33 @@ export function ChatHistoryList() {
           >
             <MessageSquare className="w-4 h-4 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">{chat.title}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {formatDate(chat.updatedAt)}
-              </div>
+              {editingId === chat.id ? (
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  onBlur={() => saveRename(chat.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveRename(chat.id);
+                    if (e.key === 'Escape') setEditingId(null);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full px-2 py-1 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded"
+                  autoFocus
+                />
+              ) : (
+                <>
+                  <div className="text-sm font-medium truncate">
+                    {chat.favorite && '⭐ '}{chat.title}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {formatDate(chat.updatedAt)}
+                  </div>
+                </>
+              )}
             </div>
             
-            {/* ✅ Mobile par hamesha visible, Desktop par hover par */}
+            {/* Mobile par hamesha visible, Desktop par hover par */}
             <div className="lg:opacity-0 lg:group-hover:opacity-100 opacity-100 transition-opacity">
               <Dropdown
                 align="right"
@@ -54,9 +95,32 @@ export function ChatHistoryList() {
                 }
               >
                 <DropdownItem
+                  icon={<Pencil className="w-4 h-4" />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRename(chat.id, chat.title);
+                  }}
+                >
+                  Rename
+                </DropdownItem>
+                
+                <DropdownItem
+                  icon={<Star className={`w-4 h-4 ${chat.favorite ? 'text-yellow-500 fill-yellow-500' : ''}`} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFavorite(chat.id);
+                  }}
+                >
+                  {chat.favorite ? 'Unstar' : 'Star'}
+                </DropdownItem>
+                
+                <DropdownItem
                   danger
                   icon={<Trash2 className="w-4 h-4" />}
-                  onClick={() => deleteChat(chat.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteChat(chat.id);
+                  }}
                 >
                   Delete
                 </DropdownItem>
