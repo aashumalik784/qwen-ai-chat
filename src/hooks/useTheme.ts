@@ -15,6 +15,9 @@ export function useTheme(): UseThemeReturn {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
+    // ✅ SSR fix - window check
+    if (typeof window === 'undefined') return;
+
     const stored = localStorage.getItem('aashu_theme') as Theme | null;
     if (stored && ['light', 'dark', 'system'].includes(stored)) {
       setThemeState(stored);
@@ -22,24 +25,40 @@ export function useTheme(): UseThemeReturn {
   }, []);
 
   useEffect(() => {
+    // ✅ SSR fix - window check
+    if (typeof window === 'undefined') return;
+
     const root = window.document.documentElement;
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    let resolved: 'light' | 'dark';
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const updateTheme = () => {
+      let resolved: 'light' | 'dark';
+      if (theme === 'system') {
+        resolved = mediaQuery.matches? 'dark' : 'light';
+      } else {
+        resolved = theme;
+      }
+
+      setResolvedTheme(resolved);
+      root.classList.remove('light', 'dark');
+      root.classList.add(resolved);
+    };
+
+    updateTheme();
+
+    // ✅ System theme change listener
     if (theme === 'system') {
-      resolved = systemPrefersDark ? 'dark' : 'light';
-    } else {
-      resolved = theme;
+      mediaQuery.addEventListener('change', updateTheme);
+      return () => mediaQuery.removeEventListener('change', updateTheme);
     }
-    
-    setResolvedTheme(resolved);
-    root.classList.remove('light', 'dark');
-    root.classList.add(resolved);
   }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem('aashu_theme', newTheme);
+    // ✅ SSR fix - localStorage check
+    if (typeof window!== 'undefined') {
+      localStorage.setItem('aashu_theme', newTheme);
+    }
   };
 
   return { theme, setTheme, resolvedTheme };
