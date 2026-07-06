@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/hooks/useTheme';
 import { AI_PROVIDERS, AIProvider } from '@/lib/constants';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
   const { model, setModel, temperature, setTemperature, maxTokens, setMaxTokens } = useSettingsStore();
@@ -15,6 +15,11 @@ export default function SettingsPage() {
 
   const provider = AI_PROVIDERS[selectedProvider];
   const models = Object.entries(provider.models);
+
+  // Jab provider change ho, toh default model set karein
+  useEffect(() => {
+    setModel(provider.defaultModel);
+  }, [selectedProvider, provider.defaultModel, setModel]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
