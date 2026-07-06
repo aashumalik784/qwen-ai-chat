@@ -4,11 +4,8 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useTheme } from '@/hooks/useTheme';
-import { AI_PROVIDERS } from '@/lib/constants';
+import { AI_PROVIDERS, AIProvider } from '@/lib/constants';
 import { useState, useEffect } from 'react';
-
-type AIProvider = keyof typeof AI_PROVIDERS;
 
 export default function SettingsPage() {
   const {
@@ -22,21 +19,18 @@ export default function SettingsPage() {
     setSelectedProvider
   } = useSettingsStore();
 
-  // ✅ Fix: selectedProvider ko validate karke default set kiya
   const [localProvider, setLocalProvider] = useState<AIProvider>(() => {
-    return (selectedProvider in AI_PROVIDERS? selectedProvider : 'groq') as AIProvider;
+    return (selectedProvider in AI_PROVIDERS ? selectedProvider : 'groq') as AIProvider;
   });
-
-  useTheme();
 
   const provider = AI_PROVIDERS[localProvider];
   const models = Object.entries(provider.models);
 
-  // ✅ Fix: useEffect dependency fix - sirf localProvider pe chalega
   useEffect(() => {
     setSelectedModel(provider.defaultModel);
     setSelectedProvider(localProvider);
-  }, [localProvider]); // ❌ provider.defaultModel, setSelectedModel, setSelectedProvider hata diya
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localProvider]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -59,9 +53,9 @@ export default function SettingsPage() {
             onChange={(e) => setLocalProvider(e.target.value as AIProvider)}
             className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
           >
-            {Object.entries(AI_PROVIDERS).map(([key, config]) => (
+            {(Object.keys(AI_PROVIDERS) as AIProvider[]).map((key) => (
               <option key={key} value={key}>
-                {config.name} {config.speed}
+                {AI_PROVIDERS[key].name} {AI_PROVIDERS[key].speed}
               </option>
             ))}
           </select>
