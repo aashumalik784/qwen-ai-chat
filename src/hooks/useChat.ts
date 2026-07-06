@@ -15,8 +15,8 @@ export function useChat() {
     setActiveChat,
     addMessage,
     updateLastMessage,
-    updateChatTitle,
-    toggleFavorite,  // ✅ NAYA ADD KIYA
+    updateChatTitle,      // ✅ YEH ADD KIYA
+    toggleFavorite,       // ✅ YEH ADD KIYA
     setGenerating,
     getActiveChat,
     getMessagesForAPI,
@@ -118,7 +118,8 @@ export function useChat() {
     createChat,
     deleteChat,
     setActiveChat,
-    toggleFavorite,  // ✅ NAYA EXPORT KIYA
+    toggleFavorite,      // ✅ YEH ADD KIYA
+    updateChatTitle,     // ✅ YEH ADD KIYA
     stopStream,
   };
 }
