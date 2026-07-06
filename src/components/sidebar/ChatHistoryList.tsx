@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/ScrollArea';
 import { useState } from 'react';
 
 export function ChatHistoryList() {
-  const { chats, activeChatId, setActiveChat, deleteChat } = useChat();
+  const { chats, activeChatId, setActiveChat, deleteChat, toggleFavorite } = useChat();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
 
@@ -19,15 +19,9 @@ export function ChatHistoryList() {
 
   const saveRename = (chatId: string) => {
     if (editTitle.trim()) {
-      // You'll need to add updateChatTitle to useChat hook
-      // For now, this is a placeholder
+      // Placeholder - you can add rename function to useChat if needed
       setEditingId(null);
     }
-  };
-
-  const handleFavorite = (chatId: string) => {
-    // Add favorite functionality
-    console.log('Toggle favorite for:', chatId);
   };
 
   if (chats.length === 0) {
@@ -80,7 +74,6 @@ export function ChatHistoryList() {
               )}
             </div>
             
-            {/* Mobile par hamesha visible, Desktop par hover par */}
             <div className="lg:opacity-0 lg:group-hover:opacity-100 opacity-100 transition-opacity">
               <Dropdown
                 align="right"
@@ -95,20 +88,10 @@ export function ChatHistoryList() {
                 }
               >
                 <DropdownItem
-                  icon={<Pencil className="w-4 h-4" />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRename(chat.id, chat.title);
-                  }}
-                >
-                  Rename
-                </DropdownItem>
-                
-                <DropdownItem
                   icon={<Star className={`w-4 h-4 ${chat.favorite ? 'text-yellow-500 fill-yellow-500' : ''}`} />}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleFavorite(chat.id);
+                    toggleFavorite(chat.id);  // ✅ NAYA USE KIYA
                   }}
                 >
                   {chat.favorite ? 'Unstar' : 'Star'}
