@@ -9,6 +9,7 @@ export interface ChatRequest {
   stream?: boolean;
   temperature?: number;
   max_tokens?: number;
+  provider?: string;  // ✅ NAYA ADD KIYA
 }
 
 export interface ChatResponse {
