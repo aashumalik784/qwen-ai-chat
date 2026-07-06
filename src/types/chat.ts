@@ -1,40 +1,58 @@
-export interface Message {
-  id: string;
+export interface ChatCompletionMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp: number;
-  isStreaming?: boolean;
 }
 
+export interface ChatRequest {
+  messages: ChatCompletionMessage[];
+  model?: string;
+  stream?: boolean;
+  temperature?: number;
+  max_tokens?: number;
+  provider?: string;
+}
+
+export interface ChatResponse {
+  id: string;
+  choices: {
+    message: {
+      role: string;
+      content: string;
+    };
+    finish_reason: string;
+  }[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
+export interface StreamDelta {
+  choices: {
+    delta: {
+      content?: string;
+      role?: string;
+    };
+    finish_reason: string | null;
+  }[];
+}
+
+// ✅ Chat interface update kiya
 export interface Chat {
   id: string;
   title: string;
   messages: Message[];
   createdAt: number;
   updatedAt: number;
+  favorite?: boolean;  // ✅ NAYA ADD KIYA
 }
 
-export interface ChatRequest {
-  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
-  model?: string;
-  temperature?: number;
-  max_tokens?: number;
-  stream?: boolean;
-  provider?: string;  // ✅ NAYA ADD KIYA
-}
-
-export interface ChatResponse {
+// ✅ Message interface (agar nahi hai)
+export interface Message {
   id: string;
-  choices: Array<{
-    message: {
-      role: 'assistant';
-      content: string;
-    };
-    finish_reason: string;
-  }>;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: number;
+  isStreaming?: boolean;
 }
