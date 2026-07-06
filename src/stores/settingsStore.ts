@@ -15,6 +15,7 @@ interface SettingsState {
   // UI Settings
   theme: 'light' | 'dark' | 'system';
   sidebarCollapsed: boolean;
+  sidebarOpen: boolean;  // ✅ NAYA ADD KIYA
   
   // Actions
   setSelectedProvider: (provider: AIProvider) => void;
@@ -24,7 +25,8 @@ interface SettingsState {
   setMaxTokens: (tokens: number) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
-  toggleSidebar: () => void;  // ✅ NAYA ADD KIYA
+  setSidebarOpen: (open: boolean) => void;  // ✅ NAYA ADD KIYA
+  toggleSidebar: () => void;
   resetSettings: () => void;
 }
 
@@ -46,6 +48,7 @@ export const useSettingsStore = create<SettingsState>()(
       // UI Settings
       theme: 'system',
       sidebarCollapsed: false,
+      sidebarOpen: true,  // ✅ NAYA ADD KIYA (default open)
       
       // Actions
       setSelectedProvider: (provider) => {
@@ -70,11 +73,20 @@ export const useSettingsStore = create<SettingsState>()(
       setTemperature: (temp) => set({ temperature: temp }),
       setMaxTokens: (tokens) => set({ maxTokens: tokens }),
       setTheme: (theme) => set({ theme }),
-      setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
       
-      // ✅ NAYA FUNCTION ADD KIYA
+      setSidebarCollapsed: (collapsed) => set({ 
+        sidebarCollapsed: collapsed,
+        sidebarOpen: !collapsed,  // ✅ SYNC
+      }),
+      
+      setSidebarOpen: (open) => set({ 
+        sidebarOpen: open,
+        sidebarCollapsed: !open,  // ✅ SYNC
+      }),
+      
       toggleSidebar: () => set((state) => ({ 
-        sidebarCollapsed: !state.sidebarCollapsed 
+        sidebarCollapsed: !state.sidebarCollapsed,
+        sidebarOpen: !state.sidebarOpen,  // ✅ DONO TOGGLE
       })),
       
       resetSettings: () => set({
@@ -85,6 +97,7 @@ export const useSettingsStore = create<SettingsState>()(
         maxTokens: MAX_TOKENS,
         theme: 'system',
         sidebarCollapsed: false,
+        sidebarOpen: true,
       }),
     }),
     {
