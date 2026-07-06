@@ -6,7 +6,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 export type Theme = 'light' | 'dark' | 'system';
 
 export function useTheme() {
-  const { theme } = useSettingsStore();
+  const { theme, setTheme } = useSettingsStore();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -28,4 +28,6 @@ export function useTheme() {
       root.classList.add(theme);
     }
   }, [theme]);
+
+  return { theme, setTheme };
 }
