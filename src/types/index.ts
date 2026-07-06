@@ -12,6 +12,7 @@ export interface Chat {
   messages: Message[];
   createdAt: number;
   updatedAt: number;
+  favorite?: boolean;  // ✅ YEH LINE ADD KAREIN - MISSING THI!
 }
 
 export interface ChatRequest {
@@ -20,7 +21,7 @@ export interface ChatRequest {
   temperature?: number;
   max_tokens?: number;
   stream?: boolean;
-  provider?: string;  // ✅ NAYA ADD KIYA
+  provider?: string;
 }
 
 export interface ChatResponse {
