@@ -15,6 +15,7 @@ interface ChatStore {
   setActiveChat: (id: string | null) => void;
   addMessage: (chatId: string, message: Omit<Message, 'id' | 'timestamp'>) => void;
   updateLastMessage: (chatId: string, content: string) => void;
+  updateChatTitle: (chatId: string, title: string) => void;
   setGenerating: (value: boolean) => void;
   getActiveChat: () => Chat | null;
   getMessagesForAPI: (chatId: string) => { role: 'user' | 'assistant' | 'system'; content: string }[];
@@ -47,7 +48,8 @@ export const useChatStore = create<ChatStore>()(
         set((state) => {
           const newChats = state.chats.filter((c) => c.id !== id);
           return {
-            chats: newChats,            activeChatId: state.activeChatId === id 
+            chats: newChats,
+            activeChatId: state.activeChatId === id 
               ? (newChats[0]?.id || null) 
               : state.activeChatId,
           };
@@ -96,7 +98,19 @@ export const useChatStore = create<ChatStore>()(
             }
             return { ...chat, messages, updatedAt: Date.now() };
           }),
-        }));      },
+        }));
+      },
+
+      // ✅ NAYA FUNCTION ADD KIYA
+      updateChatTitle: (chatId, title) => {
+        set((state) => ({
+          chats: state.chats.map((chat) => 
+            chat.id === chatId 
+              ? { ...chat, title, updatedAt: Date.now() }
+              : chat
+          ),
+        }));
+      },
 
       setGenerating: (value) => set({ isGenerating: value }),
 
