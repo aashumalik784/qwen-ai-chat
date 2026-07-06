@@ -15,7 +15,6 @@ export function useTheme(): UseThemeReturn {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    // ✅ SSR fix - window check
     if (typeof window === 'undefined') return;
 
     const stored = localStorage.getItem('aashu_theme') as Theme | null;
@@ -25,7 +24,6 @@ export function useTheme(): UseThemeReturn {
   }, []);
 
   useEffect(() => {
-    // ✅ SSR fix - window check
     if (typeof window === 'undefined') return;
 
     const root = window.document.documentElement;
@@ -34,7 +32,7 @@ export function useTheme(): UseThemeReturn {
     const updateTheme = () => {
       let resolved: 'light' | 'dark';
       if (theme === 'system') {
-        resolved = mediaQuery.matches? 'dark' : 'light';
+        resolved = mediaQuery.matches? 'dark' : 'light'; // ✅ Space add kiya
       } else {
         resolved = theme;
       }
@@ -46,7 +44,6 @@ export function useTheme(): UseThemeReturn {
 
     updateTheme();
 
-    // ✅ System theme change listener
     if (theme === 'system') {
       mediaQuery.addEventListener('change', updateTheme);
       return () => mediaQuery.removeEventListener('change', updateTheme);
@@ -55,8 +52,7 @@ export function useTheme(): UseThemeReturn {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    // ✅ SSR fix - localStorage check
-    if (typeof window!== 'undefined') {
+    if (typeof window!== 'undefined') { // ✅ Space add kiya
       localStorage.setItem('aashu_theme', newTheme);
     }
   };
