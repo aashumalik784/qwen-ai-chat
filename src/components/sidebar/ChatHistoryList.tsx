@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/ScrollArea';
 import { useState } from 'react';
 
 export function ChatHistoryList() {
-  const { chats, activeChatId, setActiveChat, deleteChat, toggleFavorite } = useChat();
+  const { chats, activeChatId, setActiveChat, deleteChat, toggleFavorite, updateChatTitle } = useChat();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
 
@@ -19,8 +19,9 @@ export function ChatHistoryList() {
 
   const saveRename = (chatId: string) => {
     if (editTitle.trim()) {
-      // Placeholder - you can add rename function to useChat if needed
+      updateChatTitle(chatId, editTitle.trim());
       setEditingId(null);
+      setEditTitle('');
     }
   };
 
@@ -88,10 +89,20 @@ export function ChatHistoryList() {
                 }
               >
                 <DropdownItem
+                  icon={<Pencil className="w-4 h-4" />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRename(chat.id, chat.title);
+                  }}
+                >
+                  Rename
+                </DropdownItem>
+                
+                <DropdownItem
                   icon={<Star className={`w-4 h-4 ${chat.favorite ? 'text-yellow-500 fill-yellow-500' : ''}`} />}
                   onClick={(e) => {
                     e.stopPropagation();
-                    toggleFavorite(chat.id);  // ✅ NAYA USE KIYA
+                    toggleFavorite(chat.id);
                   }}
                 >
                   {chat.favorite ? 'Unstar' : 'Star'}
