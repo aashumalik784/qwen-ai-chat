@@ -1,7 +1,11 @@
 # 🤖 Aashu AI Chat - Multi-AI Provider Chat Application
 
 Ek powerful AI chat application jo **7 AI providers** ke saath kaam karta hai with automatic fallback system. Agar ek provider fail ho, toh automatically doosra try karega!
+# 🤖 Aashu AI Chat - Multi-AI Provider Chat Application
 
+> 🚀 **Live Demo**: [Try on Vercel](https://qwen-ai-chat.vercel.app) | [Try on Cloudflare](https://qwen-ai-chat.pages.dev)
+
+Ek powerful AI chat application jo **7 AI providers** ke saath kaam karta hai...
 ![Next.js](https://img.shields.io/badge/Next.js-14.2.5-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.10-blue)
