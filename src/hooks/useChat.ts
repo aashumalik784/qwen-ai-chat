@@ -22,7 +22,7 @@ export function useChat() {
     getMessagesForAPI,
   } = useChatStore();
 
-  const { model, temperature, maxTokens, selectedProvider } = useSettingsStore();
+  const { model, temperature, maxTokens } = useSettingsStore();
 
   const { isStreaming, startStream, stopStream } = useStream({
     onDone: () => {
@@ -77,8 +77,8 @@ export function useChat() {
       model,
       temperature,
       max_tokens: maxTokens || MAX_TOKENS,
-      provider: selectedProvider,
       stream: true,
+      // ✅ provider parameter hata diya
     });
   }, [
     activeChatId, 
@@ -89,8 +89,7 @@ export function useChat() {
     getMessagesForAPI, 
     model, 
     temperature, 
-    maxTokens, 
-    selectedProvider,
+    maxTokens,
     chats,
     updateChatTitle,
     startStream
