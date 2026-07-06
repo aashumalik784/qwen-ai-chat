@@ -23,6 +23,12 @@ export function useChat() {
 
   const { model, temperature, maxTokens, selectedProvider } = useSettingsStore();
 
+  // ✅ stopStream function add kiya (placeholder - non-streaming mode mein kaam nahi karta)
+  const stopStream = useCallback(() => {
+    console.log('⏹️ Stop stream called (non-streaming mode)');
+    setGenerating(false);
+  }, [setGenerating]);
+
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || isGenerating) return;
 
@@ -120,5 +126,6 @@ export function useChat() {
     createChat,
     deleteChat,
     setActiveChat,
+    stopStream,  // ✅ Yeh add kiya
   };
 }
