@@ -6,7 +6,7 @@ interface SettingsState {
   // Provider & Model
   selectedProvider: AIProvider;
   model: string;
-  selectedModel: string;  // ✅ ALIAS ADDED (for compatibility)
+  selectedModel: string;
   
   // Generation Settings
   temperature: number;
@@ -19,11 +19,12 @@ interface SettingsState {
   // Actions
   setSelectedProvider: (provider: AIProvider) => void;
   setModel: (model: string) => void;
-  setSelectedModel: (model: string) => void;  // ✅ ALIAS ADDED
+  setSelectedModel: (model: string) => void;
   setTemperature: (temp: number) => void;
   setMaxTokens: (tokens: number) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  toggleSidebar: () => void;  // ✅ NAYA ADD KIYA
   resetSettings: () => void;
 }
 
@@ -36,7 +37,7 @@ export const useSettingsStore = create<SettingsState>()(
       // Provider & Model
       selectedProvider: defaultProvider,
       model: defaultModel,
-      selectedModel: defaultModel,  // ✅ ALIAS
+      selectedModel: defaultModel,
       
       // Generation Settings
       temperature: TEMPERATURE,
@@ -52,24 +53,29 @@ export const useSettingsStore = create<SettingsState>()(
         set({ 
           selectedProvider: provider,
           model: newDefaultModel,
-          selectedModel: newDefaultModel,  // ✅ DONO UPDATE
+          selectedModel: newDefaultModel,
         });
       },
       
       setModel: (model) => set({ 
         model,
-        selectedModel: model,  // ✅ DONO UPDATE
+        selectedModel: model,
       }),
       
       setSelectedModel: (model) => set({ 
         model,
-        selectedModel: model,  // ✅ DONO UPDATE
+        selectedModel: model,
       }),
       
       setTemperature: (temp) => set({ temperature: temp }),
       setMaxTokens: (tokens) => set({ maxTokens: tokens }),
       setTheme: (theme) => set({ theme }),
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+      
+      // ✅ NAYA FUNCTION ADD KIYA
+      toggleSidebar: () => set((state) => ({ 
+        sidebarCollapsed: !state.sidebarCollapsed 
+      })),
       
       resetSettings: () => set({
         selectedProvider: defaultProvider,
