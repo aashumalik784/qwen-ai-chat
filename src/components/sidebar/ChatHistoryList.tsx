@@ -77,13 +77,16 @@ export function ChatHistoryList() {
             
             <div className="lg:opacity-0 lg:group-hover:opacity-100 opacity-100 transition-opacity">
               <Dropdown
-                align="right"
-                trigger={
-                  <button
-                    onClick={(e) => e.stopPropagation()}
-                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-                    aria-label="Chat options"
-                  >
+  align="right"
+  trigger={
+    <button
+      className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+      aria-label="Chat options"
+    >
+      <MoreVertical className="w-4 h-4" />
+    </button>
+  }
+>
                     <MoreVertical className="w-4 h-4" />
                   </button>
                 }
