@@ -3,49 +3,43 @@ import { AI_PROVIDERS } from '@/lib/constants';
 
 export const runtime = 'edge';
 
-export async function POST(request: NextRequest) {
+// Fallback order - jo pehle try hoga
+const FALLBACK_ORDER = [
+  'groq',
+  'cerebras',
+  'deepseek',
+  'openrouter',
+  'gemini',
+  'cohere',
+  'openai',
+];
+
+async function tryProvider(
+  provider: string,
+  messages: any[],
+  temperature: number,
+  max_tokens: number
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  const providerConfig = AI_PROVIDERS[provider as keyof typeof AI_PROVIDERS];
+  
+  if (!providerConfig) {
+    return { success: false, error: `Invalid provider: ${provider}` };
+  }
+
+  const apiKey = process.env[providerConfig.envVar];
+  
+  if (!apiKey) {
+    console.log(`️ ${providerConfig.name} key not configured, skipping...`);
+    return { success: false, error: `${providerConfig.name} API key not configured` };
+  }
+
+  const selectedModel = providerConfig.defaultModel;
+  console.log(`🔄 Trying ${providerConfig.name} with model: ${selectedModel}`);
+
   try {
-    const body = await request.json();
-    const { messages, provider = 'groq', model, temperature = 0.7, max_tokens = 4096 } = body;
-
-    console.log('📩 Request received:', { provider, messages: messages?.length });
-
-    // Validate messages
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json(
-        { error: 'Messages array is required' },
-        { status: 400 }
-      );
-    }
-
-    // Get provider config
-    const providerConfig = AI_PROVIDERS[provider as keyof typeof AI_PROVIDERS];
-    if (!providerConfig) {
-      return NextResponse.json(
-        { error: `Invalid provider: ${provider}` },
-        { status: 400 }
-      );
-    }
-
-    // Get API key
-    const apiKey = process.env[providerConfig.envVar];
-
-    if (!apiKey) {
-      console.error(`❌ ${providerConfig.envVar} not configured`);
-      return NextResponse.json(
-        { error: `${providerConfig.name} API key is not configured. Please add it in Cloudflare settings.` },
-        { status: 500 }
-      );
-    }
-
-    const selectedModel = model || providerConfig.defaultModel;
-    console.log(`🔑 Using ${providerConfig.name} with model: ${selectedModel}`);
-
     let response;
 
-    // Call appropriate API based on provider
     if (provider === 'gemini') {
-      // Gemini API has different format
       const geminiMessages = messages.map((msg) => ({
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }],
@@ -69,23 +63,25 @@ export async function POST(request: NextRequest) {
       const data = await response.json();
       
       if (!response.ok) {
-        console.error('❌ Gemini API error:', data);
-        throw new Error(data.error?.message || 'Gemini API error');
+        return { success: false, error: `Gemini API error: ${response.status}` };
       }
 
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
 
-      return NextResponse.json({
-        id: `gemini-${Date.now()}`,
-        choices: [{
-          message: { role: 'assistant', content },
-          finish_reason: 'stop',
-        }],
-        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-      });
+      return {
+        success: true,
+        data: {
+          id: `gemini-${Date.now()}`,
+          choices: [{
+            message: { role: 'assistant', content },
+            finish_reason: 'stop',
+          }],
+          usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+          provider: providerConfig.name,
+        },
+      };
 
     } else if (provider === 'cohere') {
-      // Cohere API has different format
       const lastMessage = messages[messages.length - 1];
       
       response = await fetch(`${providerConfig.endpoint}`, {
@@ -105,18 +101,21 @@ export async function POST(request: NextRequest) {
       const data = await response.json();
       
       if (!response.ok) {
-        console.error('❌ Cohere API error:', data);
-        throw new Error(data.message || 'Cohere API error');
+        return { success: false, error: `Cohere API error: ${response.status}` };
       }
 
-      return NextResponse.json({
-        id: `cohere-${Date.now()}`,
-        choices: [{
-          message: { role: 'assistant', content: data.text },
-          finish_reason: 'stop',
-        }],
-        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-      });
+      return {
+        success: true,
+        data: {
+          id: `cohere-${Date.now()}`,
+          choices: [{
+            message: { role: 'assistant', content: data.text },
+            finish_reason: 'stop',
+          }],
+          usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+          provider: providerConfig.name,
+        },
+      };
 
     } else {
       // OpenAI-compatible APIs (Groq, Cerebras, OpenAI, DeepSeek, OpenRouter)
@@ -137,34 +136,72 @@ export async function POST(request: NextRequest) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ ${providerConfig.name} API error:`, response.status, errorText);
-        
-        if (response.status === 401) {
-          return NextResponse.json(
-            { error: `Invalid ${providerConfig.name} API key. Please check your key in Cloudflare settings.` },
-            { status: 401 }
-          );
-        }
-        
-        if (response.status === 429) {
-          return NextResponse.json(
-            { error: 'Rate limit exceeded. Please wait a moment.' },
-            { status: 429 }
-          );
-        }
-        
-        throw new Error(`${providerConfig.name} API error: ${response.status}`);
+        console.error(`❌ ${providerConfig.name} failed:`, response.status, errorText);
+        return { success: false, error: `${providerConfig.name} API error: ${response.status}` };
       }
 
       const data = await response.json();
       console.log(`✅ ${providerConfig.name} success!`);
 
-      return NextResponse.json({
-        id: data.id,
-        choices: data.choices,
-        usage: data.usage,
-      });
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          choices: data.choices,
+          usage: data.usage,
+          provider: providerConfig.name,
+        },
+      };
     }
+  } catch (error) {
+    return { 
+      success: false, 
+      error: `${providerConfig.name} error: ${error instanceof Error ? error.message : 'Unknown'}` 
+    };
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { messages, temperature = 0.7, max_tokens = 4096 } = body;
+
+    console.log('📩 Request received:', { messages: messages?.length });
+
+    // Validate messages
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json(
+        { error: 'Messages array is required' },
+        { status: 400 }
+      );
+    }
+
+    // Try each provider in fallback order
+    const errors: string[] = [];
+    
+    for (const provider of FALLBACK_ORDER) {
+      console.log(`\n🔄 Attempting with ${provider}...`);
+      
+      const result = await tryProvider(provider, messages, temperature, max_tokens);
+      
+      if (result.success) {
+        console.log(`\n🎉 Success with ${provider}!`);
+        return NextResponse.json(result.data);
+      } else {
+        console.log(`❌ ${provider} failed: ${result.error}`);
+        errors.push(`${provider}: ${result.error}`);
+      }
+    }
+
+    // All providers failed
+    console.error('\n💥 All providers failed!');
+    return NextResponse.json(
+      { 
+        error: 'All AI providers failed. Please try again later.',
+        details: errors,
+      },
+      { status: 503 }
+    );
 
   } catch (error) {
     console.error('💥 API route error:', error);
