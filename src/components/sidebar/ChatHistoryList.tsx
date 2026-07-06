@@ -90,20 +90,14 @@ export function ChatHistoryList() {
               >
                 <DropdownItem
                   icon={<Pencil className="w-4 h-4" />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRename(chat.id, chat.title);
-                  }}
+                  onClick={() => handleRename(chat.id, chat.title)}
                 >
                   Rename
                 </DropdownItem>
                 
                 <DropdownItem
                   icon={<Star className={`w-4 h-4 ${chat.favorite ? 'text-yellow-500 fill-yellow-500' : ''}`} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(chat.id);
-                  }}
+                  onClick={() => toggleFavorite(chat.id)}
                 >
                   {chat.favorite ? 'Unstar' : 'Star'}
                 </DropdownItem>
@@ -111,10 +105,7 @@ export function ChatHistoryList() {
                 <DropdownItem
                   danger
                   icon={<Trash2 className="w-4 h-4" />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteChat(chat.id);
-                  }}
+                  onClick={() => deleteChat(chat.id)}
                 >
                   Delete
                 </DropdownItem>
