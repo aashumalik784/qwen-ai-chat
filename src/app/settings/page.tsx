@@ -5,21 +5,33 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/hooks/useTheme';
-import { AI_PROVIDERS, AIProvider } from '@/lib/constants';
+import { AI_PROVIDERS } from '@/lib/constants';
 import { useState, useEffect } from 'react';
 
+type AIProvider = keyof typeof AI_PROVIDERS;
+
 export default function SettingsPage() {
-  const { model, setModel, temperature, setTemperature, maxTokens, setMaxTokens } = useSettingsStore();
-  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('groq');
+  const {
+    selectedModel,
+    setSelectedModel,
+    temperature,
+    setTemperature,
+    maxTokens,
+    setMaxTokens,
+    selectedProvider,
+    setSelectedProvider
+  } = useSettingsStore();
+
+  const [localProvider, setLocalProvider] = useState<AIProvider>(selectedProvider as AIProvider);
   useTheme();
 
-  const provider = AI_PROVIDERS[selectedProvider];
+  const provider = AI_PROVIDERS[localProvider];
   const models = Object.entries(provider.models);
 
-  // Jab provider change ho, toh default model set karein
   useEffect(() => {
-    setModel(provider.defaultModel);
-  }, [selectedProvider, provider.defaultModel, setModel]);
+    setSelectedModel(provider.defaultModel);
+    setSelectedProvider(localProvider);
+  }, [localProvider, provider.defaultModel, setSelectedModel, setSelectedProvider]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -35,12 +47,11 @@ export default function SettingsPage() {
       </header>
 
       <main className="max-w-3xl mx-auto p-6 space-y-6">
-        {/* AI Provider Selection */}
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">AI Provider</h2>
           <select
-            value={selectedProvider}
-            onChange={(e) => setSelectedProvider(e.target.value as AIProvider)}
+            value={localProvider}
+            onChange={(e) => setLocalProvider(e.target.value as AIProvider)}
             className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
           >
             {Object.entries(AI_PROVIDERS).map(([key, config]) => (
@@ -54,7 +65,6 @@ export default function SettingsPage() {
           </p>
         </section>
 
-        {/* Model Selection */}
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Model</h2>
           <div className="space-y-2">
@@ -67,8 +77,8 @@ export default function SettingsPage() {
                   type="radio"
                   name="model"
                   value={modelKey}
-                  checked={model === modelKey}
-                  onChange={() => setModel(modelKey)}
+                  checked={selectedModel === modelKey}
+                  onChange={() => setSelectedModel(modelKey)}
                   className="text-brand-600"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">{modelName}</span>
@@ -77,7 +87,6 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Temperature */}
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Temperature</h2>
           <div className="space-y-2">
@@ -97,7 +106,6 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Max Tokens */}
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Max Tokens</h2>
           <input
