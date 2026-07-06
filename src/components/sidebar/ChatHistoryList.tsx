@@ -39,7 +39,7 @@ export function ChatHistoryList() {
               </div>
             </div>
             
-            {/* ✅ Mobile ke liye hamesha visible, Desktop ke liye hover */}
+            {/* ✅ Mobile par hamesha visible, Desktop par hover par */}
             <div className="lg:opacity-0 lg:group-hover:opacity-100 opacity-100 transition-opacity">
               <Dropdown
                 align="right"
@@ -56,10 +56,7 @@ export function ChatHistoryList() {
                 <DropdownItem
                   danger
                   icon={<Trash2 className="w-4 h-4" />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteChat(chat.id);
-                  }}
+                  onClick={() => deleteChat(chat.id)}
                 >
                   Delete
                 </DropdownItem>
