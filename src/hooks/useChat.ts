@@ -16,12 +16,13 @@ export function useChat() {
     setActiveChat,
     addMessage,
     updateLastMessage,
+    updateChatTitle,
     setGenerating,
     getActiveChat,
     getMessagesForAPI,
   } = useChatStore();
 
-  const { model, temperature, maxTokens } = useSettingsStore();
+  const { model, temperature, maxTokens, selectedProvider } = useSettingsStore();
 
   const { isStreaming, startStream, stopStream } = useStream({
     onDone: () => {
@@ -37,8 +38,26 @@ export function useChat() {
     if (!content.trim() || isGenerating) return;
 
     let chatId = activeChatId;
+    let isNewChat = false;
+    
     if (!chatId) {
       chatId = createChat();
+      isNewChat = true;
+    }
+
+    // Check if this is the first message (title update needed)
+    const currentChat = chats.find(c => c.id === chatId);
+    const needsTitleUpdate = isNewChat || 
+      !currentChat?.title || 
+      currentChat.title === 'New Chat' ||
+      currentChat.messages.length === 0;
+
+    // Generate title from first message
+    if (needsTitleUpdate) {
+      const title = content.length > 40 
+        ? content.substring(0, 40) + '...' 
+        : content;
+      updateChatTitle(chatId, title);
     }
 
     // Add user message
@@ -58,9 +77,24 @@ export function useChat() {
       model,
       temperature,
       max_tokens: maxTokens || MAX_TOKENS,
+      provider: selectedProvider,
       stream: true,
     });
-  }, [activeChatId, isGenerating, createChat, addMessage, setGenerating, getMessagesForAPI, model, temperature, maxTokens, startStream]);
+  }, [
+    activeChatId, 
+    isGenerating, 
+    createChat, 
+    addMessage, 
+    setGenerating, 
+    getMessagesForAPI, 
+    model, 
+    temperature, 
+    maxTokens, 
+    selectedProvider,
+    chats,
+    updateChatTitle,
+    startStream
+  ]);
 
   return {
     chats,
