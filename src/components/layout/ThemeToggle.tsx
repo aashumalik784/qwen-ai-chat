@@ -3,35 +3,33 @@
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/hooks/useTheme';
-import { Dropdown, DropdownItem } from '@/components/ui/Dropdown';
+import { Theme } from '@/hooks/useTheme';
+import { JSX } from 'react';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  const icons = {
-    light: <Sun className="w-4 h-4" />,
-    dark: <Moon className="w-4 h-4" />,
-    system: <Monitor className="w-4 h-4" />,
+  const icons: Record<Theme, JSX.Element> = {
+    light: <Sun className="w-5 h-5" />,
+    dark: <Moon className="w-5 h-5" />,
+    system: <Monitor className="w-5 h-5" />,
+  };
+
+  const cycleTheme = () => {
+    const themes: Theme[] = ['light', 'dark', 'system'];
+    const currentIndex = themes.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
   };
 
   return (
-    <Dropdown
-      align="right"
-      trigger={
-        <Button variant="ghost" size="icon">
-          {icons[theme]}
-        </Button>
-      }
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={cycleTheme}
+      aria-label="Toggle theme"
     >
-      <DropdownItem onClick={() => setTheme('light')} icon={<Sun className="w-4 h-4" />}>
-        Light
-      </DropdownItem>
-      <DropdownItem onClick={() => setTheme('dark')} icon={<Moon className="w-4 h-4" />}>
-        Dark
-      </DropdownItem>
-      <DropdownItem onClick={() => setTheme('system')} icon={<Monitor className="w-4 h-4" />}>
-        System
-      </DropdownItem>
-    </Dropdown>
+      {icons[theme]}
+    </Button>
   );
 }
