@@ -1,36 +1,88 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AIProvider } from '@/lib/constants';
+import { AI_PROVIDERS, AIProvider, TEMPERATURE, MAX_TOKENS } from '@/lib/constants';
 
 interface SettingsState {
-  model: string;
-  setModel: (model: string) => void;
-  temperature: number;
-  setTemperature: (temperature: number) => void;
-  maxTokens: number;
-  setMaxTokens: (maxTokens: number) => void;
+  // Provider & Model
   selectedProvider: AIProvider;
+  model: string;
+  selectedModel: string;  // ✅ ALIAS ADDED (for compatibility)
+  
+  // Generation Settings
+  temperature: number;
+  maxTokens: number;
+  
+  // UI Settings
+  theme: 'light' | 'dark' | 'system';
+  sidebarCollapsed: boolean;
+  
+  // Actions
   setSelectedProvider: (provider: AIProvider) => void;
-  sidebarOpen: boolean;
-  toggleSidebar: () => void;
+  setModel: (model: string) => void;
+  setSelectedModel: (model: string) => void;  // ✅ ALIAS ADDED
+  setTemperature: (temp: number) => void;
+  setMaxTokens: (tokens: number) => void;
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  resetSettings: () => void;
 }
+
+const defaultProvider: AIProvider = 'groq';
+const defaultModel = AI_PROVIDERS[defaultProvider].defaultModel;
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      model: 'llama-3.3-70b-versatile',
-      setModel: (model) => set({ model }),
-      temperature: 0.7,
-      setTemperature: (temperature) => set({ temperature }),
-      maxTokens: 4096,
-      setMaxTokens: (maxTokens) => set({ maxTokens }),
-      selectedProvider: 'groq',
-      setSelectedProvider: (selectedProvider) => set({ selectedProvider }),
-      sidebarOpen: true,
-      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+      // Provider & Model
+      selectedProvider: defaultProvider,
+      model: defaultModel,
+      selectedModel: defaultModel,  // ✅ ALIAS
+      
+      // Generation Settings
+      temperature: TEMPERATURE,
+      maxTokens: MAX_TOKENS,
+      
+      // UI Settings
+      theme: 'system',
+      sidebarCollapsed: false,
+      
+      // Actions
+      setSelectedProvider: (provider) => {
+        const newDefaultModel = AI_PROVIDERS[provider].defaultModel;
+        set({ 
+          selectedProvider: provider,
+          model: newDefaultModel,
+          selectedModel: newDefaultModel,  // ✅ DONO UPDATE
+        });
+      },
+      
+      setModel: (model) => set({ 
+        model,
+        selectedModel: model,  // ✅ DONO UPDATE
+      }),
+      
+      setSelectedModel: (model) => set({ 
+        model,
+        selectedModel: model,  // ✅ DONO UPDATE
+      }),
+      
+      setTemperature: (temp) => set({ temperature: temp }),
+      setMaxTokens: (tokens) => set({ maxTokens: tokens }),
+      setTheme: (theme) => set({ theme }),
+      setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+      
+      resetSettings: () => set({
+        selectedProvider: defaultProvider,
+        model: defaultModel,
+        selectedModel: defaultModel,
+        temperature: TEMPERATURE,
+        maxTokens: MAX_TOKENS,
+        theme: 'system',
+        sidebarCollapsed: false,
+      }),
     }),
     {
-      name: 'aashu_settings',
+      name: 'aashu-settings-storage',
     }
   )
 );
