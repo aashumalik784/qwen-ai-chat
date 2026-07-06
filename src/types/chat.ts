@@ -1,4 +1,3 @@
-// ✅ Pehle Message interface define karo
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -7,14 +6,13 @@ export interface Message {
   isStreaming?: boolean;
 }
 
-// ✅ Phir Chat interface (Message use karta hai)
 export interface Chat {
   id: string;
   title: string;
   messages: Message[];
   createdAt: number;
   updatedAt: number;
-  favorite?: boolean;  // ✅ NAYA ADD KIYA
+  favorite?: boolean;
 }
 
 export interface ChatCompletionMessage {
@@ -33,13 +31,13 @@ export interface ChatRequest {
 
 export interface ChatResponse {
   id: string;
-  choices: {
+  choices: Array<{
     message: {
-      role: string;
+      role: 'assistant';
       content: string;
     };
     finish_reason: string;
-  }[];
+  }>;
   usage?: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -48,11 +46,11 @@ export interface ChatResponse {
 }
 
 export interface StreamDelta {
-  choices: {
+  choices: Array<{
     delta: {
       content?: string;
       role?: string;
     };
     finish_reason: string | null;
-  }[];
+  }>;
 }
