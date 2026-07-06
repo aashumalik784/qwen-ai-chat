@@ -2,8 +2,7 @@
 
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { useTheme } from '@/hooks/useTheme';
-import { Theme } from '@/hooks/useTheme';
+import { useTheme, Theme } from '@/hooks/useTheme';
 import { JSX } from 'react';
 
 export function ThemeToggle() {
