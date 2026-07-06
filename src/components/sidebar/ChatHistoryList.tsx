@@ -20,9 +20,14 @@ export function ChatHistoryList() {
   const saveRename = (chatId: string) => {
     if (editTitle.trim()) {
       updateChatTitle(chatId, editTitle.trim());
-      setEditingId(null);
-      setEditTitle('');
     }
+    setEditingId(null);
+    setEditTitle('');
+  };
+
+  const cancelRename = () => {
+    setEditingId(null);
+    setEditTitle('');
   };
 
   if (chats.length === 0) {
@@ -45,7 +50,9 @@ export function ChatHistoryList() {
                 ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-900 dark:text-brand-100'
                 : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
             )}
-            onClick={() => setActiveChat(chat.id)}
+            onClick={() => {
+              if (editingId !== chat.id) setActiveChat(chat.id);
+            }}
           >
             <MessageSquare className="w-4 h-4 flex-shrink-0" />
             <div className="flex-1 min-w-0">
@@ -57,7 +64,7 @@ export function ChatHistoryList() {
                   onBlur={() => saveRename(chat.id)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') saveRename(chat.id);
-                    if (e.key === 'Escape') setEditingId(null);
+                    if (e.key === 'Escape') cancelRename();
                   }}
                   onClick={(e) => e.stopPropagation()}
                   className="w-full px-2 py-1 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded"
@@ -65,8 +72,9 @@ export function ChatHistoryList() {
                 />
               ) : (
                 <>
-                  <div className="text-sm font-medium truncate">
-                    {chat.favorite && '⭐ '}{chat.title}
+                  <div className="text-sm font-medium truncate flex items-center gap-1">
+                    {chat.favorite && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
+                    {chat.title}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     {formatDate(chat.updatedAt)}
@@ -75,18 +83,17 @@ export function ChatHistoryList() {
               )}
             </div>
             
-            <div className="lg:opacity-0 lg:group-hover:opacity-100 opacity-100 transition-opacity">
+            <div 
+              className="lg:opacity-0 lg:group-hover:opacity-100 opacity-100 transition-opacity"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Dropdown
-  align="right"
-  trigger={
-    <button
-      className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-      aria-label="Chat options"
-    >
-      <MoreVertical className="w-4 h-4" />
-    </button>
-  }
->
+                align="right"
+                trigger={
+                  <button
+                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    aria-label="Chat options"
+                  >
                     <MoreVertical className="w-4 h-4" />
                   </button>
                 }
