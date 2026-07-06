@@ -16,6 +16,7 @@ export function useChat() {
     addMessage,
     updateLastMessage,
     updateChatTitle,
+    toggleFavorite,  // ✅ NAYA ADD KIYA
     setGenerating,
     getActiveChat,
     getMessagesForAPI,
@@ -23,7 +24,7 @@ export function useChat() {
 
   const { model, temperature, maxTokens, selectedProvider } = useSettingsStore();
 
-  // ✅ stopStream function add kiya (placeholder - non-streaming mode mein kaam nahi karta)
+  // ✅ stopStream function (non-streaming mode)
   const stopStream = useCallback(() => {
     console.log('⏹️ Stop stream called (non-streaming mode)');
     setGenerating(false);
@@ -40,14 +41,12 @@ export function useChat() {
       isNewChat = true;
     }
 
-    // Check if this is the first message (title update needed)
     const currentChat = chats.find(c => c.id === chatId);
     const needsTitleUpdate = isNewChat || 
       !currentChat?.title || 
       currentChat.title === 'New Chat' ||
       currentChat.messages.length === 0;
 
-    // Generate title from first message
     if (needsTitleUpdate) {
       const title = content.length > 40 
         ? content.substring(0, 40) + '...' 
@@ -55,19 +54,14 @@ export function useChat() {
       updateChatTitle(chatId, title);
     }
 
-    // Add user message
     addMessage(chatId, { role: 'user', content });
-
-    // Add placeholder assistant message
     addMessage(chatId, { role: 'assistant', content: '...', isStreaming: true });
 
     setGenerating(true);
 
     try {
-      // Get updated messages
       const messages = getMessagesForAPI(chatId);
 
-      // Call API
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,13 +80,11 @@ export function useChat() {
         throw new Error(data.error || 'Failed to get response');
       }
 
-      // Get AI response
       const aiContent = data.choices?.[0]?.message?.content || 'No response';
       const usedProvider = data.provider || selectedProvider;
 
       console.log('✅ Response from:', usedProvider);
 
-      // Update the placeholder message with actual response
       updateLastMessage(chatId, aiContent);
 
     } catch (error: any) {
@@ -126,6 +118,7 @@ export function useChat() {
     createChat,
     deleteChat,
     setActiveChat,
-    stopStream,  // ✅ Yeh add kiya
+    toggleFavorite,  // ✅ NAYA EXPORT KIYA
+    stopStream,
   };
 }
