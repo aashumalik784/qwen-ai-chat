@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { messages, provider = 'groq', model, temperature = 0.7, max_tokens = 4096 } = body;
 
-    console.log(`📩 Request for ${provider}:`, { messages: messages.length, model });
+    console.log('📩 Request received:', { provider, messages: messages?.length });
 
     // Validate messages
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       console.error(`❌ ${providerConfig.envVar} not configured`);
       return NextResponse.json(
-        { error: `${providerConfig.name} API key is not configured` },
+        { error: `${providerConfig.name} API key is not configured. Please add it in Cloudflare settings.` },
         { status: 500 }
       );
     }
@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       const data = await response.json();
       
       if (!response.ok) {
+        console.error('❌ Gemini API error:', data);
         throw new Error(data.error?.message || 'Gemini API error');
       }
 
@@ -104,6 +105,7 @@ export async function POST(request: NextRequest) {
       const data = await response.json();
       
       if (!response.ok) {
+        console.error('❌ Cohere API error:', data);
         throw new Error(data.message || 'Cohere API error');
       }
 
@@ -139,7 +141,7 @@ export async function POST(request: NextRequest) {
         
         if (response.status === 401) {
           return NextResponse.json(
-            { error: `Invalid ${providerConfig.name} API key` },
+            { error: `Invalid ${providerConfig.name} API key. Please check your key in Cloudflare settings.` },
             { status: 401 }
           );
         }
@@ -171,4 +173,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-             }
+          }
