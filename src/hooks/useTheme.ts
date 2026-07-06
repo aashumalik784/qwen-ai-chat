@@ -1,24 +1,46 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { useEffect, useState } from 'react';
 
-export function useTheme() {
-  const { theme, setTheme } = useSettingsStore();
+export type Theme = 'light' | 'dark' | 'system';
+
+interface UseThemeReturn {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  resolvedTheme: 'light' | 'dark';
+}
+
+export function useTheme(): UseThemeReturn {
+  const [theme, setThemeState] = useState<Theme>('system');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const stored = localStorage.getItem('aashu_theme') as Theme | null;
+    if (stored && ['light', 'dark', 'system'].includes(stored)) {
+      setThemeState(stored);
+    }
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    let resolved: 'light' | 'dark';
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme);
+      resolved = systemPrefersDark ? 'dark' : 'light';
     } else {
-      root.classList.add(theme);
+      resolved = theme;
     }
+    
+    setResolvedTheme(resolved);
+    root.classList.remove('light', 'dark');
+    root.classList.add(resolved);
   }, [theme]);
 
-  return { theme, setTheme };
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
+    localStorage.setItem('aashu_theme', newTheme);
+  };
+
+  return { theme, setTheme, resolvedTheme };
 }
