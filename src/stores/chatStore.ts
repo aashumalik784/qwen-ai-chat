@@ -16,6 +16,7 @@ interface ChatStore {
   addMessage: (chatId: string, message: Omit<Message, 'id' | 'timestamp'>) => void;
   updateLastMessage: (chatId: string, content: string) => void;
   updateChatTitle: (chatId: string, title: string) => void;
+  toggleFavorite: (chatId: string) => void;  // ✅ NAYA ADD KIYA
   setGenerating: (value: boolean) => void;
   getActiveChat: () => Chat | null;
   getMessagesForAPI: (chatId: string) => { role: 'user' | 'assistant' | 'system'; content: string }[];
@@ -36,6 +37,7 @@ export const useChatStore = create<ChatStore>()(
           messages: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
+          favorite: false,  // ✅ Default false
         };
         set((state) => ({
           chats: [newChat, ...state.chats],
@@ -101,12 +103,22 @@ export const useChatStore = create<ChatStore>()(
         }));
       },
 
-      // ✅ NAYA FUNCTION ADD KIYA
       updateChatTitle: (chatId, title) => {
         set((state) => ({
           chats: state.chats.map((chat) => 
             chat.id === chatId 
               ? { ...chat, title, updatedAt: Date.now() }
+              : chat
+          ),
+        }));
+      },
+
+      // ✅ NAYA FUNCTION ADD KIYA
+      toggleFavorite: (chatId) => {
+        set((state) => ({
+          chats: state.chats.map((chat) => 
+            chat.id === chatId 
+              ? { ...chat, favorite: !chat.favorite, updatedAt: Date.now() }
               : chat
           ),
         }));
