@@ -6,7 +6,7 @@ import { StreamingText } from './StreamingText';
 import { cn } from '@/lib/utils';
 
 interface MessageBubbleProps {
-  message: Message;
+  message: Message;,
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
