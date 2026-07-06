@@ -1,8 +1,6 @@
-export type MessageRole = 'user' | 'assistant' | 'system';
-
 export interface Message {
   id: string;
-  role: MessageRole;
+  role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
   isStreaming?: boolean;
@@ -14,11 +12,29 @@ export interface Chat {
   messages: Message[];
   createdAt: number;
   updatedAt: number;
-  model?: string;
 }
 
-export interface ChatState {
-  chats: Chat[];
-  activeChatId: string | null;
-  isGenerating: boolean;
+export interface ChatRequest {
+  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+  model?: string;
+  temperature?: number;
+  max_tokens?: number;
+  stream?: boolean;
+  provider?: string;  // ✅ NAYA ADD KIYA
+}
+
+export interface ChatResponse {
+  id: string;
+  choices: Array<{
+    message: {
+      role: 'assistant';
+      content: string;
+    };
+    finish_reason: string;
+  }>;
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
