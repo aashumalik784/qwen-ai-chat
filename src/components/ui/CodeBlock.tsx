@@ -17,7 +17,6 @@ export function CodeBlock({ code, language = 'typescript' }: CodeBlockProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Split code into lines and add line numbers
   const lines = code.split('\n');
 
   return (
@@ -43,16 +42,16 @@ export function CodeBlock({ code, language = 'typescript' }: CodeBlockProps) {
         </button>
       </div>
 
-      {/* Code with line numbers */}
+      {/* Code with line numbers - FIX KIYA */}
       <div className="overflow-x-auto">
         <pre className="p-4 text-sm">
-          <code className="language-{language}">
+          <code className={`language-${language}`}>  {/* ✅ Yaha fix kiya */} 
             {lines.map((line, index) => (
               <div key={index} className="table-row">
                 <span className="table-cell text-right pr-4 text-gray-500 select-none">
                   {index + 1}
                 </span>
-                <span className="table-cell">{line || ' '}</span>
+                <span className="table-cell text-gray-100">{line || ' '}</span>
               </div>
             ))}
           </code>
