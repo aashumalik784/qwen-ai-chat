@@ -3,8 +3,7 @@
 import { useCallback } from 'react';
 import { useChatStore } from '@/stores/chatStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useStream } from './useStream';
-import { MAX_TOKENS, TEMPERATURE } from '@/lib/constants';
+import { MAX_TOKENS } from '@/lib/constants';
 
 export function useChat() {
   const {
@@ -22,17 +21,7 @@ export function useChat() {
     getMessagesForAPI,
   } = useChatStore();
 
-  const { model, temperature, maxTokens } = useSettingsStore();
-
-  const { isStreaming, startStream, stopStream } = useStream({
-    onDone: () => {
-      setGenerating(false);
-    },
-    onError: (error) => {
-      console.error('Stream error:', error);
-      setGenerating(false);
-    },
-  });
+  const { model, temperature, maxTokens, selectedProvider } = useSettingsStore();
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || isGenerating) return;
@@ -64,22 +53,48 @@ export function useChat() {
     addMessage(chatId, { role: 'user', content });
 
     // Add placeholder assistant message
-    addMessage(chatId, { role: 'assistant', content: '', isStreaming: true });
+    addMessage(chatId, { role: 'assistant', content: '...', isStreaming: true });
 
     setGenerating(true);
 
-    // Get updated messages (including the new user message)
-    const messages = getMessagesForAPI(chatId);
+    try {
+      // Get updated messages
+      const messages = getMessagesForAPI(chatId);
 
-    let accumulated = '';
-    await startStream({
-      messages,
-      model,
-      temperature,
-      max_tokens: maxTokens || MAX_TOKENS,
-      stream: true,
-      // ✅ provider parameter hata diya
-    });
+      // Call API
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages,
+          model,
+          temperature,
+          max_tokens: maxTokens || MAX_TOKENS,
+          provider: selectedProvider,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get response');
+      }
+
+      // Get AI response
+      const aiContent = data.choices?.[0]?.message?.content || 'No response';
+      const usedProvider = data.provider || selectedProvider;
+
+      console.log('✅ Response from:', usedProvider);
+
+      // Update the placeholder message with actual response
+      updateLastMessage(chatId, aiContent);
+
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      updateLastMessage(chatId, `Error: ${error.message}. Please try again.`);
+    } finally {
+      setGenerating(false);
+    }
   }, [
     activeChatId, 
     isGenerating, 
@@ -90,20 +105,20 @@ export function useChat() {
     model, 
     temperature, 
     maxTokens,
+    selectedProvider,
     chats,
     updateChatTitle,
-    startStream
+    updateLastMessage,
   ]);
 
   return {
     chats,
     activeChatId,
     activeChat: getActiveChat(),
-    isGenerating: isGenerating || isStreaming,
+    isGenerating,
     sendMessage,
     createChat,
     deleteChat,
     setActiveChat,
-    stopStream,
   };
 }
