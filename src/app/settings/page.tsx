@@ -22,16 +22,21 @@ export default function SettingsPage() {
     setSelectedProvider
   } = useSettingsStore();
 
-  const [localProvider, setLocalProvider] = useState<AIProvider>(selectedProvider as AIProvider);
+  // ✅ Fix: selectedProvider ko validate karke default set kiya
+  const [localProvider, setLocalProvider] = useState<AIProvider>(() => {
+    return (selectedProvider in AI_PROVIDERS? selectedProvider : 'groq') as AIProvider;
+  });
+
   useTheme();
 
   const provider = AI_PROVIDERS[localProvider];
   const models = Object.entries(provider.models);
 
+  // ✅ Fix: useEffect dependency fix - sirf localProvider pe chalega
   useEffect(() => {
     setSelectedModel(provider.defaultModel);
     setSelectedProvider(localProvider);
-  }, [localProvider, provider.defaultModel, setSelectedModel, setSelectedProvider]);
+  }, [localProvider]); // ❌ provider.defaultModel, setSelectedModel, setSelectedProvider hata diya
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
