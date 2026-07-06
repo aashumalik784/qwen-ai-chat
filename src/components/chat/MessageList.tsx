@@ -1,5 +1,5 @@
 'use client';
-import { useSettingsStore } from '@/stores/settingsStore';
+
 import { Message } from '@/types';
 import { Copy, Check } from 'lucide-react';
 import { useState } from 'react';
@@ -22,13 +22,29 @@ export function MessageList({ messages }: { messages: Message[] }) {
         </div>
       )}
       {messages.map((message) => (
-        <div key={message.id} className={`flex ${message.role === 'user'? 'justify-end' : 'justify-start'}`}>
-          <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${message.role === 'user'? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'}`}>
+        <div
+          key={message.id}
+          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+        >
+          <div
+            className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+              message.role === 'user'
+                ? 'bg-brand-600 text-white'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+            }`}
+          >
             <p className="whitespace-pre-wrap break-words">{message.content}</p>
             {message.role === 'assistant' && (
-              <button onClick={() => copyToClipboard(message.content, message.id)} className="mt-2 flex items-center gap-1 text-xs opacity-70 hover:opacity-100">
-                {copiedId === message.id? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                {copiedId === message.id? 'Copied' : 'Copy'}
+              <button
+                onClick={() => copyToClipboard(message.content, message.id)}
+                className="mt-2 flex items-center gap-1 text-xs opacity-70 hover:opacity-100 transition-opacity"
+              >
+                {copiedId === message.id ? (
+                  <Check className="w-3 h-3" />
+                ) : (
+                  <Copy className="w-3 h-3" />
+                )}
+                {copiedId === message.id ? 'Copied' : 'Copy'}
               </button>
             )}
           </div>
